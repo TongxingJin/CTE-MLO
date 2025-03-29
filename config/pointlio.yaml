@@ -1,0 +1,35 @@
+common:
+    lidar_num: 1   
+    lid_topic:  ["/livox/lidar"]
+    
+preprocess:
+    lidar_type: [1]                # AVIA = 1, AVIA2, OUST64, VELO16, REALSENSE, ROBOSENSE
+    scan_line: [6]
+    timestamp_unit: [0]            # 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
+    blind: 0.5
+
+max_iteration: 5
+
+mapping:
+    acc_cov: 1 #1 for spnning; 5 for pendulum
+    gyr_cov: 1 #1 for spnning; 5 for pendulum 
+    pc_cov: 0.0005 # 0.0005 for spnning; 0.0001 for pendulum
+    rate: 100 # means lidar_mean_scantime = 1/rate
+    root_surf_voxel_size: 0.3
+    max_layer: 1
+    PCS: false
+    k1: 500 # the degeneration threshold
+    rms_win_size: 5
+    extrinsic_T: [0,0,0]
+    extrinsic_R: [1,0,0,0]
+
+publish:
+    path_en:  true
+    scan_publish_en:  true       # false: close all the point cloud output
+    dense_publish_en: false       # false: low down the points number in a global-frame point clouds scan.
+    scan_bodyframe_pub_en: false  # true: output the point cloud scans in IMU-body-frame
+
+pcd_save:
+    pcd_save_en: false
+    interval: -1                 # how many LiDAR frames saved in each pcd file; 
+                                 # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
