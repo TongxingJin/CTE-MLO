@@ -70,10 +70,6 @@ include_directories(
   ${PYTHON_INCLUDE_DIRS}  
   include)
 
-add_message_files(
-  FILES
-)
-
 generate_messages(
  DEPENDENCIES
  geometry_msgs

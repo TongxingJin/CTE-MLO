@@ -73,6 +73,7 @@
 #include <execution>
 #include <unordered_set>
 #include <Eigen/Dense>
+#include <filesystem>
 
 #define INIT_TIME           (0.5)
 #define MAXN                (720000)
@@ -82,6 +83,7 @@ bool   pcd_save_en = false, path_en = true;
 
 mutex mtx_buffer;
 string root_dir = ROOT_DIR;
+string log_dir;
 
 double win_beg_time = -1e6;
 double gyr_cov = 0.1, acc_cov = 0.1, LASER_POINT_COV = 0.001;//, b_gyr_cov = 0.0001, b_acc_cov = 0.0001;
@@ -379,16 +381,15 @@ void publish_frame_world(const ros::Publisher & pubLaserCloudFull)
         laserCloudmsg.header.stamp = ros::Time().fromSec(lidar_end_time);
         laserCloudmsg.header.frame_id = "camera_init";
         pubLaserCloudFull.publish(laserCloudmsg);
-        // publish_count -= PUBFRAME_PERIOD;
         if (pcd_save_en) {
             *pcl_wait_save += *laserCloudWorld;
             static int scan_wait_num = 0;
-            scan_wait_num ++;
+            scan_wait_num++;
             if (pcl_wait_save->size() > 0 && pcd_save_interval > 0  && scan_wait_num >= pcd_save_interval) {
                 pcd_index ++;
-                string all_points_dir(string(string(ROOT_DIR) + "PCD/scans_") + to_string(pcd_index) + string(".pcd"));
+                string all_points_dir(log_dir + "scans_" + to_string(pcd_index) + ".pcd");
                 pcl::PCDWriter pcd_writer;
-                cout << "current scan saved to /PCD/" << all_points_dir << endl;
+                cout << "current scan saved to " << all_points_dir << endl;
                 pcd_writer.writeBinary(all_points_dir, *pcl_wait_save);
                 pcl_wait_save->clear();
                 scan_wait_num = 0;
@@ -957,7 +958,9 @@ int main(int argc, char** argv)
     kf.init_dyn_share(get_f, df_dx, df_dw, h_share_model, NUM_MAX_ITERATIONS, epsi);
     
     /*** debug record ***/
-    string pos_log_dir = root_dir + "/Log/pos_log.txt";
+    log_dir = root_dir + "/Log/";
+    if (!filesystem::exists(log_dir)) filesystem::create_directories(log_dir);
+    string pos_log_dir = log_dir+"pos_log.txt";
     fp = fopen(pos_log_dir.c_str(),"w");
 
     lidar_msg_buffer.resize(lidar_num);
@@ -1015,16 +1018,16 @@ int main(int argc, char** argv)
     /* 1. make sure you have enough memories
     /* 2. pcd save will largely influence the real-time performences **/
     if (pcl_wait_save->size() > 0 && pcd_save_en) {
-        string file_name = string("scans.pcd");
-        string all_points_dir(string(string(ROOT_DIR) + "PCD/") + file_name);
+        string file_name = "scans.pcd";
+        string all_points_dir(log_dir + file_name);
         pcl::PCDWriter pcd_writer;
-        cout << "current scan saved to /PCD/" << file_name<<endl;
+        cout << "current scan saved to " << all_points_dir <<endl;
         pcd_writer.writeBinary(all_points_dir, *pcl_wait_save);
     }
 
     if (runtime_pos_log) {
         FILE *fp2;
-        string log_dir = root_dir + "/Log/ctemlo_time_log.csv";
+        string log_dir = log_dir + "ctemlo_time_log.csv";
         fp2 = fopen(log_dir.c_str(),"w");
         fprintf(fp2,"Downsample, ICP, map_incre, total\n");
         for (int i = 0;i<time_log_counter; i++) {

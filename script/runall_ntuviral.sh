@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 catkin_make -C /home/$USER/work/ctemlo_ws;
-source /home/$USER/work/ctemlo_public_ws/devel/setup.bash # TODO: Please change this one based on your env
+source /home/$USER/work/ctemlo_ws/devel/setup.bash # TODO: Please change this one based on your env
 export EPOC_DIR=/home/$USER/bag/ntu_viral/ntuviral_ctemlo # Log path
 export DATASET_LOCATION=/mnt/e/bag/ntu_viral # bag path
 

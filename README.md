@@ -19,20 +19,29 @@
 
 ## Setup
 1. Install Ubuntu with ROS. This project has been tested on Ubuntu 20.04 (ROS Noetic) with the default PCL 1.8 and Eigen 3.3.7.
-2. Install [livox_ros_driver](https://github.com/Livox-SDK/livox_ros_driver) and [livox_ros_driver2](https://github.com/Livox-SDK/livox_ros_driver2).
+2. Install the [Livox-SDK2](https://github.com/Livox-SDK/Livox-SDK2/tree/master)
     ```
-    git clone https://github.com/Livox-SDK/livox_ros_driver.git ws_livox/src
+    git clone https://github.com/Livox-SDK/Livox-SDK2.git
+    cd ./Livox-SDK2/
+    mkdir build
+    cd build
+    cmake .. && make -j
+    sudo make install
+    ```
+3. Install [livox_ros_driver](https://github.com/Livox-SDK/livox_ros_driver) and [livox_ros_driver2](https://github.com/Livox-SDK/livox_ros_driver2).
+    ```
+    git clone https://github.com/Livox-SDK/livox_ros_driver.git ~/ws_livox/src
     cd ws_livox
     catkin_make
-    git clone https://github.com/Livox-SDK/livox_ros_driver2.git ws_livox/src/livox_ros_driver2
-    cd ws_livox/src/livox_ros_driver2
+    git clone https://github.com/Livox-SDK/livox_ros_driver2.git ~/ws_livox/src/livox_ros_driver2
+    cd ~/ws_livox/src/livox_ros_driver2
     ./build.sh ROS1
     ```
-3. Clone CTE-MLO and catkin_make
+4. Clone CTE-MLO and catkin_make
     ```
     mkdir -p ~/ctemlo_ws/src
     cd ~/ctemlo_ws/src
-    git clone git@github.com:shenhm516/CTE-MLO.git
+    git clone https://github.com/shenhm516/CTE-MLO.git
     cd ..
     source ~/ws_livox/devel/setup.bash
     catkin_make
