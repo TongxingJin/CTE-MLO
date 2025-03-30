@@ -21,8 +21,8 @@ mapping:
     rms_win_size: 5
 
     extrinsic_T: [-0.05, 0.0, 0.055,
-                -0.50, 0.030, 0.035] 
-    extrinsic_R: [1,0,0,0,
+                  -0.50, 0.03, -0.005]
+    extrinsic_R: [1, 0, 0, 0,
                   0, 0, 0.7071, 0.7071]
 
 publish:

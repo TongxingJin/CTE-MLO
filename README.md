@@ -37,13 +37,19 @@
     source ~/ws_livox/devel/setup.bash
     catkin_make
     ```
+
+## Exteinsic
+The first row of the extrinsic matrix represents the extrinsic from ```0#LiDAR``` to the body frame (<img src="https://latex.codecogs.com/svg.image?{}^b{\mathbf{T}}_{l_0}"/>), while the remaining rows represent the extrinsic of other LiDARs to ```0#LiDAR``` (<img src="https://latex.codecogs.com/svg.image?{}^{l_0}{\mathbf{T}}_{l_i}" />).
+
+We provide a Python script to calculate extrinsics using the NTU-VIRAL dataset as an example.
+```
+python3 ctemlo_ws/src/CTE-MLO/script/extrinsic.py
+```
 ## Run on [NTU-VIRAL Dataset](https://ntu-aris.github.io/ntu_viral_dataset/)
 ```
 source ~/ctemlo_ws/devel/setup.bash
 roslaunch cte_mlo mapping_NTUviral.launch   
 ```
-*Remark:* The first row of the extrinsic matrix represents the extrinsic from ```0#LiDAR``` to the body frame (${}^b{\mathbf{T}}_{l_0}$), while the remaining rows represent the extrinsic of other LiDARs to ```0#LiDAR``` (${}^{l_0}{\mathbf{T}}_{l_i}$).
-
 
 *Remark:* Don't forget to set the path of bag in ```mapping_NTUviral.launch```.
 
