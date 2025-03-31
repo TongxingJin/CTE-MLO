@@ -15,7 +15,7 @@ mapping:
     root_surf_voxel_size: 2 
     max_layer: 1
     PCS: false
-    k1: 500 # the degeneration threshold in X-ICP (250/10*lidar_num)
+    k1: 500 # the degeneration threshold
     rms_win_size: 5
     extrinsic_T: [0,0,0] 
     extrinsic_R: [1, 0, 0, 0]

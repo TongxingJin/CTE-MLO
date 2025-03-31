@@ -47,7 +47,7 @@
     catkin_make
     ```
 
-## Exteinsic
+## Extrinsic
 The first row of the extrinsic matrix represents the extrinsic from ```0#LiDAR``` to the body frame (<img src="https://latex.codecogs.com/svg.image?{}^b{\mathbf{T}}_{l_0}"/>), while the remaining rows represent the extrinsic of other LiDARs to ```0#LiDAR``` (<img src="https://latex.codecogs.com/svg.image?{}^{l_0}{\mathbf{T}}_{l_i}" />).
 
 We provide a Python script to calculate extrinsics using the NTU-VIRAL dataset as an example.

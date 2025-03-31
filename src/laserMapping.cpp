@@ -265,7 +265,6 @@ bool sync_packages(MeasureGroup &meas) {
         while(!lidar_msg_buffer[i].empty()) {
             if (lidar_msg_buffer[i].front().msg_end_time < win_beg_time) {
                 lidar_msg_buffer[i].pop_front();
-                // cout << "Hello" << endl;
             } else {
                 if (lidar_msg_buffer[i].front().msg_end_time >= win_beg_time && 
                     lidar_msg_buffer[i].front().point_beg_time <= lidar_end_time) 
@@ -1027,8 +1026,8 @@ int main(int argc, char** argv)
 
     if (runtime_pos_log) {
         FILE *fp2;
-        string log_dir = log_dir + "ctemlo_time_log.csv";
-        fp2 = fopen(log_dir.c_str(),"w");
+        string time_log_dir = log_dir + "ctemlo_time_log.csv";
+        fp2 = fopen(time_log_dir.c_str(),"w");
         fprintf(fp2,"Downsample, ICP, map_incre, total\n");
         for (int i = 0;i<time_log_counter; i++) {
             fprintf(fp2,"%0.8f,%0.8f,%0.8f,%0.8f\n",s_plot[i],s_plot1[i],s_plot2[i],s_plot3[i]);
