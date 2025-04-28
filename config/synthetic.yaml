@@ -1,0 +1,45 @@
+common:
+    lidar_num: 2
+    lid_topic:  ["/lidar_0/points_livox", "/lidar_1/points_livox"]
+    # lid_topic:  ["/lidar_0/points_livox"]
+    
+preprocess:
+    lidar_type: [1,1]                # AVIA = 1, AVIA2, OUST64, VELO16, REALSENSE, ROBOSENSE
+    timestamp_unit: [3,3]            # 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
+    # lidar_type: [1]                # AVIA = 1, AVIA2, OUST64, VELO16, REALSENSE, ROBOSENSE
+    # timestamp_unit: [3]            # 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
+    blind: 2
+
+max_iteration: 4
+
+mapping:
+    acc_cov: 0.1
+    gyr_cov: 0.1
+    pc_cov: 0.002
+    rate: 100 # means lidar_mean_scantime = 1/rate
+    root_surf_voxel_size: 2
+    max_layer: 2
+    PCS: true
+    k1: 500 # the degeneration threshold
+    rms_win_size: 5
+
+    extrinsic_T: [0.00000, 0.00000, 0.00000,
+                  -0.1768, 0.0000, -0.5304]
+    extrinsic_R: [0.92388, 0.00000, 0.38268, 0.00000,
+                  0, -0.382685, 0, 0.923879]
+    # extrinsic_T: [0.00000, 0.00000, 0.00000]
+    # extrinsic_R: [0.92388, 0.00000, 0.38268, 0.00000] #wxyz
+
+publish:
+    path_en:  true
+    scan_publish_en:  true       # false: close all the point cloud output
+    dense_publish_en: false       # false: low down the points number in a global-frame point clouds scan.
+    scan_bodyframe_pub_en: true  # true: output the point cloud scans in IMU-body-frame
+
+pcd_save:
+    pcd_save_en: false
+    interval: -1                 # how many LiDAR frames saved in each pcd file; 
+                                 # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
+
+prior_map:
+    path: "/media/jin/T7Shield/GPTR_data/sim_priormap.pcd"

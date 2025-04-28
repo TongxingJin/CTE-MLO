@@ -324,7 +324,7 @@ void cut_voxel(std::unordered_map<VOXEL_LOC, OCTO_TREE*> &feat_map, pcl::PointCl
     #pragma omp parallel for
 #endif
     for (int i = 0; i < size; i++) {
-        pointBodyToWorld(&pl_feat->points[i], &laserCloudWorld->points[i]);
+        pointBodyToWorld(&pl_feat->points[i], &laserCloudWorld->points[i]);//! from lidar0 to world
     }
     std::for_each(std::execution::unseq, laserCloudWorld->points.begin(), laserCloudWorld->points.end(), [](const auto& pt_w) {
         V3D pvec_tran(pt_w.x, pt_w.y, pt_w.z);
@@ -348,7 +348,49 @@ void cut_voxel(std::unordered_map<VOXEL_LOC, OCTO_TREE*> &feat_map, pcl::PointCl
             ot->voxel_center[2] = (0.5+position.z) * rootSurfVoxelSize;
             ot->quater_length = rootSurfVoxelSize / 4.0;
             surf_map[position] = ot;
-            feat_map_update_iter.push_back(surf_map.find(position));
+            feat_map_update_iter.push_back(surf_map.find(position));//! jin: save changed voxel/octrees
+        }
+    // }
+    });
+    /****************Update voxels which has new points******************/
+    std::for_each(std::execution::seq, feat_map_update_iter.begin(), feat_map_update_iter.end(), [](const auto& iter) {
+        iter->second->root_centors.clear();
+        iter->second->recut(0, max_layer, iter->second->root_centors, 5); 
+        iter->second->is2opt = 0;
+    });
+}
+
+void initialize_prior_map(std::unordered_map<VOXEL_LOC, OCTO_TREE*> &feat_map, pcl::PointCloud<pcl::PointXYZI>::Ptr pl_feat) {
+    feat_map_update_iter.clear();
+    auto size = pl_feat->points.size();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudWorld = pl_feat;
+// #ifdef MP_EN
+//     omp_set_num_threads(MP_PROC_NUM);
+//     #pragma omp parallel for
+// #endif
+    std::for_each(std::execution::unseq, laserCloudWorld->points.begin(), laserCloudWorld->points.end(), [](const auto& pt_w) {
+        V3D pvec_tran(pt_w.x, pt_w.y, pt_w.z);
+        float loc_xyz[3];
+        for(int j=0; j<3; j++) loc_xyz[j] = pvec_tran[j] / rootSurfVoxelSize;
+        VOXEL_LOC position(floor(loc_xyz[0]), floor(loc_xyz[1]), floor(loc_xyz[2]));
+        // Find corresponding voxel
+        auto iter = surf_map.find(position);
+        if(iter != surf_map.end()) {
+            iter->second->plvec_tran->push_back(pvec_tran);
+            if (iter->second->is2opt == 0) {
+                feat_map_update_iter.push_back(iter);
+                iter->second->is2opt = 1;
+            }  
+        } else {
+            OCTO_TREE *ot = new OCTO_TREE();
+            ot->plvec_tran->push_back(pvec_tran);
+            ot->is2opt = 2;
+            ot->voxel_center[0] = (0.5+position.x) * rootSurfVoxelSize;
+            ot->voxel_center[1] = (0.5+position.y) * rootSurfVoxelSize;
+            ot->voxel_center[2] = (0.5+position.z) * rootSurfVoxelSize;
+            ot->quater_length = rootSurfVoxelSize / 4.0;
+            surf_map[position] = ot;
+            feat_map_update_iter.push_back(surf_map.find(position));//! jin: save changed voxel/octrees
         }
     // }
     });
@@ -798,10 +840,31 @@ void pcl_redund_mini(PointCloudXYZI::Ptr &feats_down_body) {
     *feats_down_body = *feats_rms_body;
 }
 
+std::string map_path;
+ros::Publisher pub_prior_map;
 void lioThread() {
     lidar_mean_scantime = 1.0/fix_rate;
     ros::Rate rate(fix_rate);
     bool status = ros::ok();
+    
+    //! jin: initialize by prior map
+    pcl::PointCloud<pcl::PointXYZI>::Ptr prior_map(new pcl::PointCloud<pcl::PointXYZI>);
+    if(pcl::io::loadPCDFile<pcl::PointXYZI>(map_path, *prior_map) == -1){
+        std::cerr << "Load prior map failed.." << std::endl;
+    }else{
+        std::cout << "Loaded " << prior_map->size() << " points." << std::endl;
+    }
+    initialize_prior_map(surf_map, prior_map);
+    std::cout << "Initialized Octree successfully." << std::endl;
+    std::cout << "Map size: " << surf_map.size() << std::endl;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr downsampled_map(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::VoxelGrid<pcl::PointXYZI> voxel_filter;
+    voxel_filter.setInputCloud(prior_map);
+    voxel_filter.setLeafSize(0.2f, 0.2f, 0.2f); // 设置体素大小，比如20cm
+    voxel_filter.filter(*downsampled_map);
+
+
+    int map_pub_count = 0;
     while (status) {
         mtx_buffer.lock();
         double t_sync = omp_get_wtime();
@@ -809,6 +872,14 @@ void lioThread() {
         t_sync = omp_get_wtime() - t_sync;
         mtx_buffer.unlock();
         if(sync) {
+            if(map_pub_count <= 600){
+                sensor_msgs::PointCloud2 cloud_msg;
+                pcl::toROSMsg(*downsampled_map, cloud_msg);
+                cloud_msg.header.frame_id = "camera_init";
+                cloud_msg.header.stamp = ros::Time::now();
+                pub_prior_map.publish(cloud_msg);
+                map_pub_count++;
+            }
             if (flg_first_scan) {
                 first_lidar_time = Measures.lidar_beg_time;
                 p_kf->first_lidar_time = first_lidar_time;
@@ -823,6 +894,10 @@ void lioThread() {
             p_kf->Process(Measures, kf, feats_undistort, flg_EKF_inited);
             state_point = kf.get_x();
             auto pre_state = state_point;
+            //! jin
+            // std::cout << "pub id: " << map_pub_count << std::endl;
+            // std::cout << "t: " << state_point.pos.x() << ", " << state_point.pos.y() << ", " << state_point.pos.z() << ", " << std::endl;
+            // std::cout << "q: " << state_point.rot.coeffs()[3] << ", " << state_point.rot.coeffs()[0] << ", " << state_point.rot.coeffs()[1] << ", " << state_point.rot.coeffs()[2] << std::endl;
 
             if (feats_undistort->empty() || (feats_undistort == NULL)) continue;
 
@@ -831,11 +906,11 @@ void lioThread() {
             downSizeFilterSurf.filter(*feats_down_body);
             feats_down_size = feats_down_body->points.size();
             
-            if(!surf_map.size() || !flg_EKF_inited) {
-                if(feats_down_size > 5) 
-                    cut_voxel(surf_map, feats_down_body);
-                continue;
-            }
+            // if(!surf_map.size() || !flg_EKF_inited) {//! jin: initialize map
+            //     if(feats_down_size > 5) 
+            //         cut_voxel(surf_map, feats_down_body);
+            //     continue;
+            // }
 
             if (pcs && ((Measures.lidar_beg_time - first_lidar_time) > 1)) 
                 pcl_redund_mini(feats_down_body); 
@@ -856,7 +931,7 @@ void lioThread() {
             state_point = kf.get_x();
 
             kf.predict_pub(lidar_mean_scantime, p_kf->Q);
-            auto state_pub = kf.get_x_pub();
+            auto state_pub = kf.get_x_pub();//! jin: base frame
             pos_cur = state_pub.pos;
             vel_cur = state_pub.vel;
             geoQuat.x = state_pub.rot.coeffs()[0];
@@ -869,7 +944,7 @@ void lioThread() {
 
             /*** add the feature points to map kdtree ***/
             t3 = omp_get_wtime();
-            cut_voxel(surf_map, feats_down_body);
+            // cut_voxel(surf_map, feats_down_body);
             t5 = omp_get_wtime();
 
             
@@ -935,6 +1010,10 @@ int main(int argc, char** argv)
     nh.param<vector<double>>("mapping/extrinsic_T", extrinT, vector<double>());
     nh.param<vector<double>>("mapping/extrinsic_R", extrinR, vector<double>());
     nh.param<double>("mapping/k1", k1, 180);
+
+    //! jin
+    nh.param<string>("prior_map/path", map_path, "empty map path");
+    pub_prior_map = nh.advertise<sensor_msgs::PointCloud2>("prior_map", 1);
     
     path.header.stamp    = ros::Time::now();
     path.header.frame_id ="camera_init";

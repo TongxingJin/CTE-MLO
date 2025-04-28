@@ -113,8 +113,12 @@ void KFProcess::set_acc_cov(const V3D &scaler)
 
 void KFProcess::init(const MeasureGroup &meas, esekfom::esekf<state_ikfom, 6> &kf_state) {
   state_ikfom init_state = kf_state.get_x();
-  init_state.rot = Eye3d;
-  init_state.pos = Zero3d;
+//   init_state.rot = Eye3d;
+//   init_state.pos = Zero3d;
+  //! jin: initial pose
+  init_state.rot = Eigen::Quaterniond(0.92388, -7.96122e-09, -1.82915e-09, 0.382683).normalized().toRotationMatrix();
+  init_state.pos = V3D(0.0, 0.0, 0.75);
+
   init_state.vel = Zero3d;
   init_state.omg = Zero3d;
   init_state.acc = Zero3d;
