@@ -8,7 +8,7 @@ preprocess:
     timestamp_unit: [3,3]            # 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
     # lidar_type: [1]                # AVIA = 1, AVIA2, OUST64, VELO16, REALSENSE, ROBOSENSE
     # timestamp_unit: [3]            # 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
-    blind: 2
+    blind: 0.5
 
 max_iteration: 4
 
@@ -17,7 +17,7 @@ mapping:
     gyr_cov: 0.1
     pc_cov: 0.002
     rate: 100 # means lidar_mean_scantime = 1/rate
-    root_surf_voxel_size: 2
+    root_surf_voxel_size: 0.5
     max_layer: 2
     PCS: true
     k1: 500 # the degeneration threshold

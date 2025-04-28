@@ -675,7 +675,7 @@ void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_
         
         ekfom_data.h_x.block<1, 3>(i,0) = norm_vecT;
         M3D point_dR_crossmat;
-        point_dR_crossmat<<SKEW_SYM_MATRX((dR*point_this_be));
+        point_dR_crossmat<<SKEW_SYM_MATRX((dR*point_this));
         ekfom_data.h_x.block<1, 3>(i,3) = -normT_R*(point_dR_crossmat+0.5*a_crossmat*dt*dt);
         ekfom_data.h_x.block<1, 3>(i,6) = norm_vecT*dt;
         ekfom_data.h_x.block<1, 3>(i,9) = -normT_R*dR*point_crossmat*dt;
@@ -895,9 +895,9 @@ void lioThread() {
             state_point = kf.get_x();
             auto pre_state = state_point;
             //! jin
-            // std::cout << "pub id: " << map_pub_count << std::endl;
-            // std::cout << "t: " << state_point.pos.x() << ", " << state_point.pos.y() << ", " << state_point.pos.z() << ", " << std::endl;
-            // std::cout << "q: " << state_point.rot.coeffs()[3] << ", " << state_point.rot.coeffs()[0] << ", " << state_point.rot.coeffs()[1] << ", " << state_point.rot.coeffs()[2] << std::endl;
+            std::cout << "pub id: " << map_pub_count << std::endl;
+            std::cout << "t: " << state_point.pos.x() << ", " << state_point.pos.y() << ", " << state_point.pos.z() << ", " << std::endl;
+            std::cout << "q: " << state_point.rot.coeffs()[3] << ", " << state_point.rot.coeffs()[0] << ", " << state_point.rot.coeffs()[1] << ", " << state_point.rot.coeffs()[2] << std::endl;
 
             if (feats_undistort->empty() || (feats_undistort == NULL)) continue;
 

@@ -15,7 +15,7 @@
     </group>
     
     <arg name="bag_file" default="/media/jin/T7Shield/GPTR_data/cloud_avia_mid_w25_dynxtrz_e5.bag" />
-    <node pkg="rosbag" required="$(arg autorun)" type="play" name="bag_play" args="$(arg bag_file) --clock -s 20 -r 1"/>
+    <node pkg="rosbag" required="$(arg autorun)" type="play" name="bag_play" args="$(arg bag_file) --clock -r 1"/>
 
     
 </launch>
