@@ -116,13 +116,28 @@ void KFProcess::init(const MeasureGroup &meas, esekfom::esekf<state_ikfom, 6> &k
 //   init_state.rot = Eye3d;
 //   init_state.pos = Zero3d;
   //! jin: initial pose
-  init_state.rot = Eigen::Quaterniond(0.92388, -7.96122e-09, -1.82915e-09, 0.382683).normalized().toRotationMatrix();
-  init_state.pos = V3D(0.0, 0.0, 0.75);
+//   init_state.rot = Eigen::Quaterniond(0.92388, -7.96122e-09, -1.82915e-09, 0.382683).normalized().toRotationMatrix();
+//   init_state.pos = V3D(0.0, 0.0, 0.75);
+//   Eigen::Quaterniond q(1.238826569169759750e-02, -3.416659310460090637e-04, 4.724707105197012424e-04, -9.999231100082397461e-01);
+//   q.normalize();
+//   std::cout << "initial q: " << q.w() << ", " << q.x() << ", " << q.y() << ", " << q.z() << std::endl;
+  init_state.rot = Eigen::Quaterniond(1.238826569169759750e-02, -3.416659310460090637e-04, 4.724707105197012424e-04, -9.999231100082397461e-01).normalized().toRotationMatrix();
+  init_state.pos = Eigen::Vector3d(8.585503324866294861e-03, -1.540905237197875977e-02, 7.415168881416320801e-01);
 
   init_state.vel = Zero3d;
   init_state.omg = Zero3d;
   init_state.acc = Zero3d;
   kf_state.change_x(init_state);
+
+
+  {
+    state_ikfom second_state = init_state;
+    second_state.build_S2_state();
+    second_state.build_SO3_state();
+    second_state.build_vect_state();
+    std::cout << "second q: " << second_state.rot.coeffs()[3] << ", " << second_state.rot.coeffs()[0] << ", " << second_state.rot.coeffs()[1] << ", " << second_state.rot.coeffs()[2] << std::endl;
+
+  }
 
   esekfom::esekf<state_ikfom, 6>::cov init_P = kf_state.get_P();
   init_P.setIdentity();
