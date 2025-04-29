@@ -85,4 +85,4 @@ add_executable(cte_mlo src/laserMapping.cpp)
 target_link_libraries(cte_mlo ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PYTHON_LIBRARIES} tbb)
 target_include_directories(cte_mlo PRIVATE ${PYTHON_INCLUDE_DIRS})
 
-add_executable(eigen_test src/eigen_test.cpp)
+# add_executable(eigen_test src/eigen_test.cpp)

@@ -555,6 +555,7 @@ void publish_path(const ros::Publisher pubPath) {
         msg_body_pose.pose.orientation.w = geoQuat.w;
         msg_body_pose.header.stamp = ros::Time().fromSec(lidar_end_time);
         msg_body_pose.header.frame_id = "camera_init";
+        // printf("lidar_end_time: %f\n", lidar_end_time);
         path.poses.push_back(msg_body_pose);
         pubPath.publish(path);
     }
@@ -895,9 +896,9 @@ void lioThread() {
             state_point = kf.get_x();
             auto pre_state = state_point;
             //! jin
-            std::cout << "pub id: " << map_pub_count << std::endl;
-            std::cout << "t: " << state_point.pos.x() << ", " << state_point.pos.y() << ", " << state_point.pos.z() << ", " << std::endl;
-            std::cout << "q: " << state_point.rot.coeffs()[3] << ", " << state_point.rot.coeffs()[0] << ", " << state_point.rot.coeffs()[1] << ", " << state_point.rot.coeffs()[2] << std::endl;
+            // std::cout << "pub id: " << map_pub_count << std::endl;
+            // std::cout << "t: " << state_point.pos.x() << ", " << state_point.pos.y() << ", " << state_point.pos.z() << ", " << std::endl;
+            // std::cout << "q: " << state_point.rot.coeffs()[3] << ", " << state_point.rot.coeffs()[0] << ", " << state_point.rot.coeffs()[1] << ", " << state_point.rot.coeffs()[2] << std::endl;
 
             if (feats_undistort->empty() || (feats_undistort == NULL)) continue;
 
@@ -980,6 +981,11 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "laserMapping");
     ros::NodeHandle nh;
+
+    string log_path = "";
+    nh.param<string>("/log_path", log_path, "");
+    printf("log_path set: %s\n", log_path.c_str());
+    
     nh.param<bool>("publish/path_en",path_en, true);
     nh.param<bool>("publish/scan_publish_en",scan_pub_en, true);
     nh.param<bool>("publish/dense_publish_en",dense_pub_en, true);
@@ -1113,5 +1119,48 @@ int main(int argc, char** argv)
         }
         fclose(fp2);
     }
+
+    // Save the path
+    for(int lidx = 0; lidx < Rextrinsic.size(); lidx++)
+    {        
+        string log_file_ = log_path + "/ctemlo_lidar" + to_string(lidx) + ".csv";
+        std::ofstream os(log_file_);
+
+        printf("Saving logs: %s\n", log_file_.c_str());
+
+        os << "# timestamp tx ty tz qx qy qz qw" << std::endl;
+
+        Eigen::Quaterniond Q_B_L(Rextrinsic[0]);
+        Eigen::Vector3d &P_B_L = Textrinsic[0];
+
+        if (lidx > 0)
+        {
+            Q_B_L = Q_B_L*Rextrinsic[lidx];
+            P_B_L = Textrinsic[0] + Rextrinsic[0]*Textrinsic[lidx];
+        }
+
+        for(auto &pose : path.poses)
+        {
+            Eigen::Quaterniond Q_W_B(pose.pose.orientation.w, pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z);
+            Eigen::Vector3d P_W_B(pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
+
+            Eigen::Quaterniond Q_W_L = Q_W_B*Q_B_L;
+            Eigen::Vector3d P_W_L = P_W_B + Q_W_B*P_B_L;
+
+            os << std::scientific << std::setprecision(18)
+               << pose.header.stamp.toSec() << " "
+               << P_W_L.x() << " "
+               << P_W_L.y() << " "
+               << P_W_L.z() << " "
+               << Q_W_L.x() << " "
+               << Q_W_L.y() << " "
+               << Q_W_L.z() << " "
+               << Q_W_L.w() << " "
+               << endl;
+        }
+
+        os.close();
+    }
+
     return 0;
 }

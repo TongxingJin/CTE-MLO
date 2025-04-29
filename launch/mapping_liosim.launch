@@ -1,0 +1,24 @@
+<launch>
+
+    <arg name="bag_file" default="/root/ros1_ws/src/gptr/scripts/cloud_avia_mid_w45_dynxtrz_e5.bag" />
+    <arg name="log_path" default="/root/"/>
+    
+    <!-- Launch file for velodyne16 VLP-16 LiDAR -->
+      <param name="use_sim_time" value="true" />
+      <arg name="rviz" default="true" />
+      <arg name="autorun" default="false"/>
+      <rosparam command="load" file="$(find cte_mlo)/config/liosim.yaml" />
+      <!-- <node pkg="tf" type="static_transform_publisher" name="w2base" args="0 0 0 0 -3.14 0 world camera_init 1" /> -->
+  
+      <param name="/log_path" value="$(arg log_path)"/>
+      <param name="point_filter_num" type="int" value="1"/>
+      <param name="filter_size_surf" type="double" value="0.2" />
+      <param name="runtime_pos_log_enable" type="bool" value="1" />
+      <node pkg="cte_mlo" type="cte_mlo" name="laserMapping" output="screen"/> 
+      <group if="$(arg rviz)">
+      <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find cte_mlo)/rviz_cfg/loam_livox.rviz" />
+      </group>
+      
+      <node pkg="rosbag" required="true" type="play" name="bag_play" args="$(arg bag_file) --clock -r 1.0 -s 4.5"/>
+  
+  </launch>

@@ -13,11 +13,11 @@ preprocess:
 max_iteration: 4
 
 mapping:
-    acc_cov: 0.1
-    gyr_cov: 0.1
-    pc_cov: 0.002
+    acc_cov: 0.3
+    gyr_cov: 0.3
+    pc_cov: 0.001
     rate: 100 # means lidar_mean_scantime = 1/rate
-    root_surf_voxel_size: 0.5
+    root_surf_voxel_size: 0.25
     max_layer: 2
     PCS: true
     k1: 500 # the degeneration threshold
@@ -40,6 +40,7 @@ pcd_save:
     pcd_save_en: false
     interval: -1                 # how many LiDAR frames saved in each pcd file; 
                                  # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
+log_file: "/root/ctemlo.csv"
 
 prior_map:
     path: "/root/ros1_ws/src/gptr/scripts/sim_priormap.pcd"
