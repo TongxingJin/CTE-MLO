@@ -894,10 +894,10 @@ void lioThread() {
             p_kf->Process(Measures, kf, feats_undistort, flg_EKF_inited);
             state_point = kf.get_x();
             auto pre_state = state_point;
-            //! jin
-            std::cout << "pub id: " << map_pub_count << std::endl;
-            std::cout << "t: " << state_point.pos.x() << ", " << state_point.pos.y() << ", " << state_point.pos.z() << ", " << std::endl;
-            std::cout << "q: " << state_point.rot.coeffs()[3] << ", " << state_point.rot.coeffs()[0] << ", " << state_point.rot.coeffs()[1] << ", " << state_point.rot.coeffs()[2] << std::endl;
+            // //! jin
+            // std::cout << "pub id: " << map_pub_count << std::endl;
+            // std::cout << "t: " << state_point.pos.x() << ", " << state_point.pos.y() << ", " << state_point.pos.z() << ", " << std::endl;
+            // std::cout << "q: " << state_point.rot.coeffs()[3] << ", " << state_point.rot.coeffs()[0] << ", " << state_point.rot.coeffs()[1] << ", " << state_point.rot.coeffs()[2] << std::endl;
 
             if (feats_undistort->empty() || (feats_undistort == NULL)) continue;
 
