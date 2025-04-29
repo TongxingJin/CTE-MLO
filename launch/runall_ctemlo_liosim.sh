@@ -20,6 +20,6 @@ for seq in "${sequences[@]}"; do
         echo "Running iteration $i..."
         log_path="/root/ros1_ws/src/I2EKF-LO/sim_exp/ctemlo/$seq/try_$i"
         mkdir -p $log_path
-        roslaunch cte_mlo mapping_liosim.launch log_path:=$log_path bag_file:="$sequence"
+        roslaunch cte_mlo mapping_liocath.launch log_path:=$log_path bag_file:="$sequence"
     done
 done

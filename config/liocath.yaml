@@ -4,7 +4,7 @@ common:
     # lid_topic:  ["/lidar_0/points_livox"]
     
 preprocess:
-    lidar_type: [1,1]                # AVIA = 1, AVIA2, OUST64, VELO16, REALSENSE, ROBOSENSE
+    lidar_type: [2,2]                # AVIA = 1, AVIA2, OUST64, VELO16, REALSENSE, ROBOSENSE
     timestamp_unit: [3,3]            # 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
     # lidar_type: [1]                # AVIA = 1, AVIA2, OUST64, VELO16, REALSENSE, ROBOSENSE
     # timestamp_unit: [3]            # 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
@@ -24,9 +24,9 @@ mapping:
     rms_win_size: 5
 
     extrinsic_T: [0.00000, 0.00000, 0.00000,
-                  -0.1768, 0.0000, -0.5304]
-    extrinsic_R: [0.92388, 0.00000, 0.38268, 0.00000,
-                  0, -0.382685, 0, 0.923879]
+                  0.117, 0, -0.141]
+    extrinsic_R: [1.0, 0.0, 0.0, 0.0,
+                  0.7071, 0.0, 0.7071, 0.0]
     # extrinsic_T: [0.00000, 0.00000, 0.00000]
     # extrinsic_R: [0.92388, 0.00000, 0.38268, 0.00000] #wxyz
 

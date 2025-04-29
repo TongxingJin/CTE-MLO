@@ -7,7 +7,7 @@
       <param name="use_sim_time" value="true" />
       <arg name="rviz" default="true" />
       <arg name="autorun" default="false"/>
-      <rosparam command="load" file="$(find cte_mlo)/config/liosim.yaml" />
+      <rosparam command="load" file="$(find cte_mlo)/config/liocath.yaml" />
       <!-- <node pkg="tf" type="static_transform_publisher" name="w2base" args="0 0 0 0 -3.14 0 world camera_init 1" /> -->
   
       <param name="/log_path" value="$(arg log_path)"/>
