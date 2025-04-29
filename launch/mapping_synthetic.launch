@@ -1,4 +1,7 @@
 <launch>
+
+  <arg name="bag_file" default="/root/ros1_ws/src/gptr/scripts/cloud_avia_mid_w25_dynxtrz_e5.bag" />
+
   <!-- Launch file for velodyne16 VLP-16 LiDAR -->
     <param name="use_sim_time" value="true" />
     <arg name="rviz" default="true" />
@@ -14,7 +17,6 @@
     <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find cte_mlo)/rviz_cfg/loam_livox.rviz" />
     </group>
     
-    <arg name="bag_file" default="/media/jin/T7Shield/GPTR_data/cloud_avia_mid_w25_dynxtrz_e5.bag" />
     <node pkg="rosbag" required="$(arg autorun)" type="play" name="bag_play" args="$(arg bag_file) --clock -r 1"/>
 
     
